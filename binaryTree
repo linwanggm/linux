@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+//node type
+#define  keyType  int
+int top=0;
+//node struct
+typedef struct BTnode
+{
+    keyType key;
+    struct BTnode* left;
+    struct BTnode* right;
+}BTnode,*BTree;
+
+//init Btree
+BTnode* initBtree()
+{
+    BTnode* btree;
+    btree=(BTnode *)malloc(sizeof(BTnode)*sizeof(char));
+    if (btree == NULL)
+    {
+        fprintf(stderr,"malloc error  %s %d",__FILE__,__LINE__);
+        exit(1);
+    }
+    btree->left=NULL;
+    btree->right=NULL;
+    return btree;
+}
+
+//insert btree
+int insertBtree(BTnode* btree, keyType key)
+{
+
+  if (top == 0)
+  { 
+      top=1; 
+      btree->left=NULL;
+      btree->right=NULL;
+      btree->key=key;       
+      return 1;
+  }
+  else
+  {
+          //new BTnode
+          BTnode* newNode;
+          newNode=(BTnode *)malloc(sizeof(BTnode)*sizeof(char));
+          if (newNode == NULL)
+          {
+              fprintf(stderr,"malloc error  %s %d",__FILE__,__LINE__);
+              return 0;
+              exit(1);
+          }
+
+          newNode->left=NULL;
+          newNode->right=NULL;
+          newNode->key=key;
+          
+      BTnode* temp=btree;
+      BTnode* preNode=btree;
+      while(temp != NULL)
+      {
+        preNode=temp;
+        if (key > temp->key)
+           temp=temp->right;
+        else if(key < temp->key)
+           temp=temp->left;
+       
+     }
+     if(key > preNode->key)
+        preNode->right=newNode;
+     else if (key < preNode->key)
+        preNode->left=newNode;
+
+  }
+
+  return 1;
+}
+
+
+int main()
+{
+ BTnode *btree; 
+ btree=initBtree();
+ insertBtree(btree,30); 
+ insertBtree(btree,22);
+ insertBtree(btree,8);
+ insertBtree(btree,5);
+ insertBtree(btree,4);
+ insertBtree(btree,90);
+ insertBtree(btree,23);
+ insertBtree(btree,12);
+ insertBtree(btree,122);
+ insertBtree(btree,102);
+
+
+ int i=1;
+ 
+
+}
