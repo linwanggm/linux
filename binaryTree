@@ -41,19 +41,19 @@ int insertBtree(BTnode* btree, keyType key)
   }
   else
   {
-          //new BTnode
-          BTnode* newNode;
-          newNode=(BTnode *)malloc(sizeof(BTnode)*sizeof(char));
-          if (newNode == NULL)
-          {
-              fprintf(stderr,"malloc error  %s %d",__FILE__,__LINE__);
-              return 0;
-              exit(1);
-          }
+	  //new BTnode
+	  BTnode* newNode;
+	  newNode=(BTnode *)malloc(sizeof(BTnode)*sizeof(char));
+	  if (newNode == NULL)
+	  {
+		  fprintf(stderr,"malloc error  %s %d",__FILE__,__LINE__);
+		  return 0;
+		  exit(1);
+	  }
 
-          newNode->left=NULL;
-          newNode->right=NULL;
-          newNode->key=key;
+	  newNode->left=NULL;
+	  newNode->right=NULL;
+	  newNode->key=key;
           
       BTnode* temp=btree;
       BTnode* preNode=btree;
@@ -76,6 +76,137 @@ int insertBtree(BTnode* btree, keyType key)
   return 1;
 }
 
+/*
+* print the binary tree 
+*/
+void printTree(BTnode *node)
+{
+    if (node != NULL)
+    {
+     
+       if (node->left != NULL)
+       {   
+           printTree(node->left);
+       }
+       if (node->right != NULL)
+       {   
+           printTree(node->right);
+
+       }
+       printf("%d\n",node->key);
+ 
+    } 
+}
+
+/*
+* destory the binary tree
+*/
+void destoryTree(BTnode *node)
+{
+    if(node != NULL)
+     {
+        if(node->left != NULL)
+        {
+            destoryTree(node->left);
+        }
+        if(node->right != NULL)
+            destoryTree(node->right);
+        printf("free : %d\n",node->key);
+        free(node);
+        node->left=NULL;
+        node->right=NULL;
+        node=NULL;
+     }
+}
+
+
+/*
+*  search binary tree node
+*/
+
+void searchBTree(BTnode* btree,keyType key, BTnode** tp)
+{
+    if(btree == NULL)
+    {
+       fprintf(stderr,"binary tree is empty.\n");
+       return;
+    }
+    BTnode* temp=btree;
+    if (key == temp->key)
+       *tp=temp;
+    else if (key < temp->key)
+       searchBTree(temp->left,key,tp);
+    else
+       searchBTree(temp->right,key,tp);
+ 
+}
+
+
+
+/*
+* delete binary node
+*
+*/
+
+int deleteBTreeNode(BTnode* btree,keyType key)
+{
+    fprintf(stdout,"-----------------------delete -------------------\n");
+    fprintf(stdout,"%d\n",key);
+    if (btree == NULL)
+    {
+        fprintf(stderr,"the binary tree is empty.\n");
+        return 0;
+    }
+    BTnode* temp;
+    searchBTree(btree,key,&temp);
+    if (temp == NULL)
+    {
+        fprintf(stderr,"no such key: %d\n",key);
+        return 0;
+    }  
+    else
+    {
+       BTnode* tp=NULL;
+       BTnode* ptp=NULL;
+       tp=temp;
+       ptp=tp;
+        
+       while(tp->right != NULL)
+       {
+          tp->key=tp->right->key;
+          ptp=tp;
+          tp=tp->right;
+       }
+
+       if(tp->left == NULL)
+       {
+          //free(tp);
+          tp=NULL;
+          return 1;
+       }
+       else
+       {
+          if(ptp == btree)
+          {             
+              ptp=btree->left;
+              free(btree);
+              btree=ptp;
+          }
+          else
+          { 
+              ptp->right=tp->left;     
+              //free(tp);
+           }
+       }
+
+  
+
+    }
+
+    return 1;
+ 
+
+}
 
 int main()
 {
@@ -91,9 +222,24 @@ int main()
  insertBtree(btree,12);
  insertBtree(btree,122);
  insertBtree(btree,102);
+ // print tree
+ printTree(btree);
+ //search key
+ BTnode* temp=NULL;
+ searchBTree(btree,122,&temp);
+ if (temp == NULL)
+    printf("cannot search the key.\n");
+ else
+    printf("search get: %d\n",temp->key);
 
-
- int i=1;
- 
+ //deleteBTreeNode(btree,90);  
+ deleteBTreeNode(btree,4);
+ //destory binary tree
+ printf("--------------------------destory--------------------\n");
+ destoryTree(btree);
+ //delete node
+// deleteBTreeNode(btree,90);  
+ printTree(btree);
+  
 
 }
