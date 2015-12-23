@@ -55,9 +55,9 @@ void *reader(void *arg)
 	printf("Read message is: %s\n",shared.datas); 
 
 	if( pthread_rwlock_unlock(&shared.rwlock) != 0 ) 
-	  printf("pthread_rwlock_unlock r fail\n");
+	  printf("pthread_rwlock_unlock read fail\n");
 	 else
-	  printf("pthread rwlock unlock r\n"); 
+	  printf("pthread rwlock unlock read ok\n"); 
 	return NULL; 
 } 
 
@@ -79,8 +79,8 @@ void *writer(void *arg)
 	strcat(shared.datas,datas); 
 
 	if(pthread_rwlock_unlock(&shared.rwlock)!=0) //释放锁 
-	  printf("pthread_rwlock_unlock w fail\n");
+	  printf("pthread_rwlock_unlock write fail\n");
 	 else
-	  printf("pthread rwlock unlock w\n");
+	  printf("pthread rwlock unlock write ok\n");
 	return NULL; 
 }
