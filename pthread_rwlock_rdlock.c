@@ -43,6 +43,7 @@ int main(int argc,char *argv[])
 	  
 	  for(i=0;i<readercount;++i) 
 	  pthread_join(tid_reader[i],NULL); 
+	  pthread_rwlock_destroy(&shared.rwlock);
 	  return 0; 
 } 
 
