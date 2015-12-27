@@ -125,3 +125,5 @@ int main()
 
     exit(0);
 }
+
+//the process from :http://www.cnblogs.com/chuyuhuashi/p/4475904.html
