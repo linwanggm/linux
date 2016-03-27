@@ -1,0 +1,53 @@
+1. 介绍
+FILE *popen(const char *command, const char *type);
+2.头文件
+#include <stdio.h>
+
+3. 示例
+#include <stdio.h>
+int main()
+{
+  FILE *pFile;
+  char cmd[64];
+  char buff[102];
+  gets(cmd); 
+  pFile = popen(cmd,"w");
+  fgets(buff,sizeof(buff),pFile);
+  printf("%s",buff);
+  pclose(pFile);
+
+  return 0;
+}
+wln@iZ232ngsvp8Z:~/test> ./popen 
+ls -l
+total 156
+-rw------- 1 wln users 376832 Mar 27 22:10 core
+-rw-r--r-- 1 wln users    154 Mar 27 21:28 myfile.txt
+-rwxr-xr-x 1 wln users  13887 Mar 27 22:14 popen
+-rw-r--r-- 1 wln users    209 Mar 27 22:14 popen.c
+-rwxr-xr-x 1 wln users  13854 Mar 27 21:28 t1
+-rw-r--r-- 1 wln users    253 Mar 27 21:28 t1.c
+
+示例2
+#include <stdio.h>
+int main()
+{
+        FILE * fp;
+        char buf[40] = {0};
+        fp = popen("bash", "w");
+        if(NULL == fp)
+        {
+                perror("popen error.\n");
+                return -1;
+        }
+        printf("Input command:");
+        fgets(buf, 40, stdin);
+        fputs(buf, fp);
+        pclose(fp);
+        return 0;
+}
+
+4. 
+type 相应的只读或只写类型。如果 type 是 "r" 则文件指针连接到 command 的标准输出；如果 type 是 "w" 则文件指针连接到 command 的标准输入。
+感觉还是不好理解啊，上面的如果改为“r”则执行ls -l只会输出1行。
+
