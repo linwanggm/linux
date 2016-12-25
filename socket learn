@@ -13,3 +13,8 @@ PF_XX 协议簇， AF_XX 地址簇， 一般与套接字文件相关联。
 参考：
 1. http://www.cnblogs.com/ylqmf/archive/2012/02/13/2349803.html
 
+2. stat()  fstat()
+主要用来获取文件相关信息，注意与access()区别
+
+参考：
+http://blog.csdn.net/abc78400123/article/details/7628174
