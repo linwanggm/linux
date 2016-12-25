@@ -1,0 +1,15 @@
+1. unix domain socket
+PF_XX 协议簇， AF_XX 地址簇， 一般与套接字文件相关联。
+
+（摘自：http://blog.csdn.net/xiongmaojiayou/article/details/7584211）
+在函数socketpair与socket的domain参数中有AF_UNIX,AF_LOCAL,AF_INET,PF_UNIX,PF_LOCAL,PF_INET.
+ 这几个参数有AF_UNIX=AF_LOCAL, PF_UNIX=PF_LOCAL, AF_LOCAL=PF_LOCAL, AF_INET=PF_INET.
+ 但是对于socketpair与socket的domain参数,使用PF_LOCAL系列,
+ 而在初始化套接口地址结构时,则使用AF_LOCAL.
+ 例如:
+     z = socket(PF_LOCAL, SOCK_STREAM, 0);
+     adr_unix.sin_family = AF_LOCAL
+
+参考：
+1. http://www.cnblogs.com/ylqmf/archive/2012/02/13/2349803.html
+
