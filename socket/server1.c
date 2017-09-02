@@ -4,7 +4,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <strings.h>
+#include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -120,7 +120,7 @@ start_listen(void)
 	if(listenFd==-1)
 	{
 		fprintf(stderr, "socket established error: %s\n",strerror(errno));
-						exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 	}
 
 	bzero(&servaddr,sizeof(servaddr));
@@ -131,8 +131,8 @@ start_listen(void)
 	int bindc = bind(listenFd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 	if(bindc == -1)
 	{
-		printf("bind error: %s\n",strerror(errno));
-		return;
+		fprintf(stderr, "bind error: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 	listen(listenFd,5);
 }
@@ -175,7 +175,7 @@ server_run(void)
 		if (clientPid = fork() == 0)
 		{
 			close(listenFd);
-			printf("client from %s\n", inet_ntoa(clientAddr.sin_addr));
+			fprintf(stdout, "client from %s\n", inet_ntoa(clientAddr.sin_addr));
 			/*show client sends message*/
 			show_client_message(clientFd);
 			exit(0);
@@ -226,27 +226,27 @@ run_backend(void)
 
   if (pid == 0)
   {
-	FILE *fd = fopen("/dev/null", "r");
-	if (fd < 0)
-	{
-		perror("open file fail:");
-		exit(EXIT_FAILURE);
-	}
+		FILE *fd = fopen("/dev/null", "r");
+		if (fd < 0)
+		{
+			perror("open file fail:");
+			exit(EXIT_FAILURE);
+		}
 
-	if (fd != NULL)
-	{
-		dup2(fileno(fd), 0);
-		fclose(fd);
-	}
+		if (fd != NULL)
+		{
+			dup2(fileno(fd), 0);
+			fclose(fd);
+		}
 
-	fd = fopen("/dev/null", "w");
-	if (fd != NULL)
-	{
-		dup2(fileno(fd), 1);
-		dup2(fileno(fd), 2);
-		fclose(fd);
-	}
-	setsid();
+		fd = fopen("/dev/null", "w");
+		if (fd != NULL)
+		{
+			dup2(fileno(fd), 1);
+			dup2(fileno(fd), 2);
+			fclose(fd);
+		}
+		setsid();
 
     }
 	else if (pid > 0)
