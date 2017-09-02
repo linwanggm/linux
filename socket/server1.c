@@ -66,27 +66,27 @@ parse_options(const int argc, char **argv)
 		switch(c)
 		{
 			case 'V':
-							fprintf(stdout, SERVER_VERSION);
-							exit(EXIT_SUCCESS);
-							break;
+				fprintf(stdout, SERVER_VERSION);
+				exit(EXIT_SUCCESS);
+				break;
 			case 'p':
-							listenPort = atoi(optarg);
-							if (listenPort < 0 || listenPort > 65535)
-							{
-											fprintf(stderr, "Invalid port number \"%s\"", optarg);
-											exit(EXIT_FAILURE);
-							}
-							fprintf(stdout, "listen_port = %d\n", listenPort);
-							break;
+				listenPort = atoi(optarg);
+				if (listenPort < 0 || listenPort > 65535)
+				{
+								fprintf(stderr, "Invalid port number \"%s\"", optarg);
+								exit(EXIT_FAILURE);
+				}
+				fprintf(stdout, "listen_port = %d\n", listenPort);
+				break;
 			case 'b':
-							runAsBackend = true;
-							break;
+				runAsBackend = true;
+				break;
 			case '?':
-							show_help();
-							break;
+				show_help();
+				break;
 			default:
-							show_help();
-							break;
+				show_help();
+				break;
 		}
 	}
 
@@ -226,38 +226,38 @@ run_backend(void)
 
   if (pid == 0)
   {
-		FILE *fd = fopen("/dev/null", "r");
-		if (fd < 0)
-		{
-			perror("open file fail:");
-			exit(EXIT_FAILURE);
-		}
+	FILE *fd = fopen("/dev/null", "r");
+	if (fd < 0)
+	{
+		perror("open file fail:");
+		exit(EXIT_FAILURE);
+	}
 
-		if (fd != NULL)
-		{
-			dup2(fileno(fd), 0);
-			fclose(fd);
-		}
+	if (fd != NULL)
+	{
+		dup2(fileno(fd), 0);
+		fclose(fd);
+	}
 
-		fd = fopen("/dev/null", "w");
-		if (fd != NULL)
-		{
-			dup2(fileno(fd), 1);
-			dup2(fileno(fd), 2);
-			fclose(fd);
-		}
-		setsid();
+	fd = fopen("/dev/null", "w");
+	if (fd != NULL)
+	{
+		dup2(fileno(fd), 1);
+		dup2(fileno(fd), 2);
+		fclose(fd);
+	}
+	setsid();
 
     }
 	else if (pid > 0)
 	{
-			fprintf(stdout, "%d\n", (int)pid);
-			exit(EXIT_SUCCESS);
+		fprintf(stdout, "%d\n", (int)pid);
+		exit(EXIT_SUCCESS);
 	}
 	else
 	{
-			fprintf(stderr, "could not fork new process:%m\n");
-			exit(EXIT_FAILURE);
+		fprintf(stderr, "could not fork new process:%m\n");
+		exit(EXIT_FAILURE);
 
 	 }
 }
