@@ -121,7 +121,7 @@ start_connect(void)
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(SERVER_PORT);
+	servaddr.sin_port=htons(serverPort);
 	inet_pton(AF_INET, server_address, &servaddr.sin_addr);
 
 	fprintf(stdout, "client try to connect %s\n", server_address);
@@ -173,7 +173,7 @@ static void client_communicate(char *data, int sockfd)
 		
 		if( FD_ISSET(sockfd, &readSet))
 		{
-			while((ret = read(sockfd, recvstr, sizeof(recvstr))) >= 0)
+			while(ret = read(sockfd, recvstr, sizeof(recvstr)-1))
 			{
 				if (ret == 0)
 				{
@@ -187,7 +187,9 @@ static void client_communicate(char *data, int sockfd)
 				}
 				else
 				{
+					recvstr[ret] = '\0';
 					fprintf(stdout, "receive from server: %s\n", recvstr);
+					break;
 				}
 				
 				memset(recvstr, 0, sizeof(recvstr));
@@ -196,20 +198,14 @@ static void client_communicate(char *data, int sockfd)
 		
 		if( FD_ISSET(fileno(fp),&readSet))
 		{
-			fprintf(stdout, "input the string to send to server:");
-			fgets(sendstr, sizeof(sendstr), fp);
-			ret = write(sockfd, sendstr, sizeof(sendstr));
+			fgets(sendstr, sizeof(sendstr)-1, fp);
+			ret = write(sockfd, sendstr, strlen(sendstr)-1);
 			memset(sendstr, 0, sizeof(sendstr));
 		}
 		
 		
 	}
 	
-	wc=write(sockfd, data, strlen(data));
-	if (wc == -1)
-		fprintf(stderr, "write error: %s\n", strerror(errno));
-	
-	exit(EXIT_SUCCESS);
 }
 
 static void

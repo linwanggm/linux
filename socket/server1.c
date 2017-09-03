@@ -113,7 +113,7 @@ start_listen(void)
 {
 	int connfd;
 	pid_t childpid;
-
+	int opt = 1;
 	struct sockaddr_in servaddr;
 
 	listenFd=socket(AF_INET, SOCK_STREAM, 0);
@@ -122,7 +122,8 @@ start_listen(void)
 		fprintf(stderr, "socket established error: %s\n",strerror(errno));
 			exit(EXIT_FAILURE);
 	}
-
+	
+	setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	bzero(&servaddr,sizeof(servaddr));
 	servaddr.sin_family=AF_INET;
 	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -197,11 +198,9 @@ static void
 signal_child(int sig)
 {
 	pid_t pid;
-	int exitStaus;
-	while(pid = waitpid(-1, &exitStaus, WNOHANG) >0)
-		fprintf(stdout, "client process pid = %d exited with status %d\n", (int)pid, exitStatus);
-	else
-		fprintf(stderr, "client process exited fail, pid = %d status = %d\n", (int)pid, exitStatus);
+	int exitStatus;
+	while(pid = waitpid(-1, &exitStatus, WNOHANG) >0)
+		fprintf(stdout, "client terminated pid=%d, status=%d\n", pid, exitStatus);
 }
 
 static void
@@ -211,26 +210,30 @@ server_communicate(int sockfd)
 	char line[512];
 
 	fprintf(stdout, "ready to read\n");
-	while((ret = read(sockfd, line, 512))> 0)
+	while(ret = read(sockfd, line, 512))
 	{
 		line[ret] = 0;
-		fprintf(stdout, "string from client: %s\n", line);
-		bzero(&line,sizeof(line));
+		if(ret < 0)
+		{
+			fprintf(stderr, "read from client error: %s\n", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		else if (ret == 0)
+			break;
+		else
+		{
+			fprintf(stdout, "string from client: %s\n", line);
+
+		}
+		bzero(&line,sizeof(line));	
+		/* send message to client */
+		ret = write(sockfd, "success", strlen("success") + 1);
+		if (ret < 0)
+		{
+			fprintf(stderr, "send message to client error: %s\n", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
 	}
-	if(ret < 0)
-	{
-		fprintf(stderr, "read from client error: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	
-	/* send message to client */
-	ret = write(sockfd, "success", strlen("success") + 1);
-	if (ret < 0)
-	{
-		fprintf(stderr, "send message to client error: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	
 	fprintf(stdout, "client connect end\n");
 }
 
