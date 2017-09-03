@@ -73,8 +73,8 @@ parse_options(const int argc, char **argv)
 				listenPort = atoi(optarg);
 				if (listenPort < 0 || listenPort > 65535)
 				{
-								fprintf(stderr, "Invalid port number \"%s\"", optarg);
-								exit(EXIT_FAILURE);
+					fprintf(stderr, "Invalid port number \"%s\"", optarg);
+					exit(EXIT_FAILURE);
 				}
 				fprintf(stdout, "listen_port = %d\n", listenPort);
 				break;
@@ -198,7 +198,10 @@ signal_child(int sig)
 {
 	pid_t pid;
 	int exitStaus;
-	while(pid = waitpid(-1, &exitStaus, WNOHANG) >0);
+	while(pid = waitpid(-1, &exitStaus, WNOHANG) >0)
+		fprintf(stdout, "client process pid = %d exited with status %d\n", (int)pid, exitStatus);
+	else
+		fprintf(stderr, "client process exited fail, pid = %d status = %d\n", (int)pid, exitStatus);
 }
 
 static void
@@ -226,27 +229,27 @@ run_backend(void)
 
   if (pid == 0)
   {
-		FILE *fd = fopen("/dev/null", "r");
-		if (fd < 0)
-		{
-			perror("open file fail:");
-			exit(EXIT_FAILURE);
-		}
+	FILE *fd = fopen("/dev/null", "r");
+	if (fd < 0)
+	{
+		perror("open file fail:");
+		exit(EXIT_FAILURE);
+	}
 
-		if (fd != NULL)
-		{
-			dup2(fileno(fd), 0);
-			fclose(fd);
-		}
+	if (fd != NULL)
+	{
+		dup2(fileno(fd), 0);
+		fclose(fd);
+	}
 
-		fd = fopen("/dev/null", "w");
-		if (fd != NULL)
-		{
-			dup2(fileno(fd), 1);
-			dup2(fileno(fd), 2);
-			fclose(fd);
-		}
-		setsid();
+	fd = fopen("/dev/null", "w");
+	if (fd != NULL)
+	{
+		dup2(fileno(fd), 1);
+		dup2(fileno(fd), 2);
+		fclose(fd);
+	}
+	setsid();
 
     }
 	else if (pid > 0)
