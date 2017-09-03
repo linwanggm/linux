@@ -17,11 +17,12 @@
 
 #define LISTEN_PORT  4322
 #define SERVER_VERSION "server 1.0"
+#define MAX_CONNECT 2
 
 static int listenFd;
 static int listenPort = LISTEN_PORT;
 static bool runAsBackend = false;
-
+static int connectNum = 0;
 
 static void parse_options(const int argc, char **argv);
 static void show_help(void);
@@ -161,8 +162,17 @@ server_run(void)
 	pid_t clientPid;
 	while(1)
 	{
+		connectNum++;
 		clientLen = sizeof(clientAddr);
 		clientFd = accept(listenFd, (struct sockaddr *)&clientAddr, &clientLen);
+		if (connectNum > MAX_CONNECT)
+		{
+			connectNum--;
+			close(clientFd);
+			fprintf(stderr, "out of max connect %d\n", MAX_CONNECT);
+			continue;
+		}
+
 		if (clientFd == -1)
 		{
 			fprintf(stderr, "accept client error: %s\n", strerror(errno));
@@ -176,7 +186,7 @@ server_run(void)
 		if (clientPid = fork() == 0)
 		{
 			close(listenFd);
-			fprintf(stdout, "client address %s\n", inet_ntoa(clientAddr.sin_addr));
+			fprintf(stdout, "client address %s port %d, total connectNum=%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), connectNum);
 			/*show client sends message*/
 			server_communicate(clientFd);
 			exit(0);
@@ -200,7 +210,10 @@ signal_child(int sig)
 	pid_t pid;
 	int exitStatus;
 	while(pid = waitpid(-1, &exitStatus, WNOHANG) >0)
+	{
+		connectNum = connectNum-1;
 		fprintf(stdout, "client terminated pid=%d, status=%d\n", pid, exitStatus);
+	}
 }
 
 static void
@@ -268,16 +281,16 @@ run_backend(void)
 	setsid();
 
     }
-	else if (pid > 0)
-	{
-		fprintf(stdout, "%d\n", (int)pid);
-		exit(EXIT_SUCCESS);
-	}
-	else
-	{
-		fprintf(stderr, "could not fork new process:%m\n");
-		exit(EXIT_FAILURE);
+    else if (pid > 0)
+    {
+	fprintf(stdout, "%d\n", (int)pid);
+	exit(EXIT_SUCCESS);
+    }
+    else
+    {
+	fprintf(stderr, "could not fork new process:%m\n");
+	exit(EXIT_FAILURE);
 
-	 }
+    }
 }
 
