@@ -29,7 +29,7 @@ static void start_listen(void);
 static void begin_server(void);
 static void server_run(void);
 static void signal_child(int sig);
-static void show_client_message(int sockfd);
+static void server_communicate(int sockfd);
 static void run_backend(void);
 
 int
@@ -175,9 +175,9 @@ server_run(void)
 		if (clientPid = fork() == 0)
 		{
 			close(listenFd);
-			fprintf(stdout, "client from %s\n", inet_ntoa(clientAddr.sin_addr));
+			fprintf(stdout, "client address %s\n", inet_ntoa(clientAddr.sin_addr));
 			/*show client sends message*/
-			show_client_message(clientFd);
+			server_communicate(clientFd);
 			exit(0);
 		}
 		else if(clientFd < 0)
@@ -205,20 +205,33 @@ signal_child(int sig)
 }
 
 static void
-show_client_message(int sockfd)
+server_communicate(int sockfd)
 {
-	ssize_t n;
+	ssize_t ret;
 	char line[512];
 
 	fprintf(stdout, "ready to read\n");
-	while((n = read(sockfd, line, 512))> 0)
+	while((ret = read(sockfd, line, 512))> 0)
 	{
-		line[n] = 0;
-		fprintf(stdout, "cient send: %s\n", line);
+		line[ret] = 0;
+		fprintf(stdout, "string from client: %s\n", line);
 		bzero(&line,sizeof(line));
 	}
-
-	fprintf(stdout, "end client\n");
+	if(ret < 0)
+	{
+		fprintf(stderr, "read from client error: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	
+	/* send message to client */
+	ret = write(sockfd, "success", strlen("success") + 1);
+	if (ret < 0)
+	{
+		fprintf(stderr, "send message to client error: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	
+	fprintf(stdout, "client connect end\n");
 }
 
 
