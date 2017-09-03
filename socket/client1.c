@@ -17,14 +17,27 @@ client1.c
 
 #define SERVER_PORT  4322
 #define CLIENT_VERSION "client 1.0"
+#define SERVER_ADDRESS "127.0.0.1"
 
-static char *server_adress;
+#define min(x,y) ({ \
+ typeof(x) _x = (x); \
+ typeof(y) _y = (y); \
+ (void) (&_x == &_y);  \
+ _x < _y ? _x : _y; })
+
+#define max(x,y) ({ \
+ typeof(x) _x = (x); \
+ typeof(y) _y = (y); \
+ (void) (&_x == &_y);  \
+ _x > _y ? _x : _y; })
+
+static char *server_address;
 static char *send_msg;
 static int sockfd;
 static int serverPort;
 
 static void parse_options(const int argc, char **argv);
-static void send_message(char *data, int sockfd);
+static void client_communicate(char *data, int sockfd);
 static void start_connect(void);
 static void	begin_server(void);
 static void client_run(void);
@@ -45,6 +58,7 @@ static void
 parse_options(const int argc, char **argv)
 {
 	serverPort = SERVER_PORT;
+	server_address = SERVER_ADDRESS;
 
 	static struct option long_options[] =
 	{
@@ -69,13 +83,13 @@ parse_options(const int argc, char **argv)
 				serverPort = atoi(optarg);
 				if (serverPort < 0 || serverPort > 65535)
 				{
-								fprintf(stderr, "Invalid port number \"%s\"", optarg);
-								exit(EXIT_FAILURE);
+					fprintf(stderr, "Invalid port number \"%s\"", optarg);
+					exit(EXIT_FAILURE);
 				}
 				fprintf(stdout, "server_port = %d\n", serverPort);
 				break;
 			case 'h':
-				server_adress = optarg;
+				server_address = optarg;
 				break;
 			case 's':
 				send_msg = optarg;
@@ -108,9 +122,9 @@ start_connect(void)
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family=AF_INET;
 	servaddr.sin_port=htons(SERVER_PORT);
-	inet_pton(AF_INET, server_adress, &servaddr.sin_addr);
+	inet_pton(AF_INET, server_address, &servaddr.sin_addr);
 
-	fprintf(stdout, "client try to connect %s\n", server_adress);
+	fprintf(stdout, "client try to connect %s\n", server_address);
 	int conRes=connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 	if(conRes==-1)
 	{    
@@ -133,17 +147,68 @@ begin_server(void)
 static void
 client_run(void)
 {
-	send_message(send_msg,sockfd);
+	client_communicate(send_msg,sockfd);
 	exit(EXIT_SUCCESS);
 }
 
 
-static void send_message(char *data, int sockfd)
+static void client_communicate(char *data, int sockfd)
 {
-	char recv[512];
-
-	int wc=write(sockfd,data,strlen(data));
-
+	char recvstr[512];
+	char sendstr[512];
+	int wc;
+	int maxfd;
+	int ret;
+	fd_set readSet;
+	FILE *fp = stdin;
+	
+	FD_ZERO(&readSet);
+	
+	for(;;)
+	{
+		FD_SET(fileno(fp), &readSet);
+		FD_SET(sockfd, &readSet);
+		maxfd = max(fileno(fp), sockfd) + 1;
+		select(maxfd, &readSet, NULL, NULL, NULL);
+		
+		if( FD_ISSET(sockfd, &readSet))
+		{
+			while((ret = read(sockfd, recvstr, sizeof(recvstr))) >= 0)
+			{
+				if (ret == 0)
+				{
+					fprintf(stdout, "receive from server end\n");
+					break;
+				}
+				else if (ret < 0)
+				{
+					fprintf(stderr, "receive from server error: %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
+				else
+				{
+					fprintf(stdout, "receive from server: %s\n", recvstr);
+				}
+				
+				memset(recvstr, 0, sizeof(recvstr));
+			}
+		}
+		
+		if( FD_ISSET(fileno(fp),&readSet))
+		{
+			fprintf(stdout, "input the string to send to server:");
+			fgets(sendstr, sizeof(sendstr), fp);
+			ret = write(sockfd, sendstr, sizeof(sendstr));
+			memset(sendstr, 0, sizeof(sendstr));
+		}
+		
+		
+	}
+	
+	wc=write(sockfd, data, strlen(data));
+	if (wc == -1)
+		fprintf(stderr, "write error: %s\n", strerror(errno));
+	
 	exit(EXIT_SUCCESS);
 }
 
