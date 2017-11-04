@@ -25,3 +25,4 @@ tcpdump -i eth0 port 6000  and host x.x.x.x  -e -A -q -vv -nn   这个输出的�
 
 参考：
 http://www.cnblogs.com/maifengqiang/p/3863168.html
+http://www.jianshu.com/p/a62ed1bb5b20
