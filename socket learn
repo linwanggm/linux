@@ -1,4 +1,5 @@
 /*test1*/
+/*test2*/
 
 1. unix domain socket
 PF_XX 协议簇， AF_XX 地址簇， 一般与套接字文件相关联。
