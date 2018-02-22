@@ -1,0 +1,39 @@
+in_addr是一个结构体，可以用来表示一个32位的IPv4地址。
+struct in_addr   
+{  
+    union   
+    {  
+        struct { UCHAR s_b1,s_b2,s_b3,s_b4; } S_un_b;  
+        struct { USHORT s_w1,s_w2; } S_un_w;  
+        ULONG S_addr;  
+    } S_un;  
+};  
+
+
+
+#include <stdio.h>
+#include <arpa/inet.h>
+
+int main()
+{
+  in_addr_t x;
+  x = 0x01;
+  x = 0x02 << 8 | x;
+  x = 0x03 << 16 | x;
+  x= 0x04 << 24 | x;
+  printf("%s\n", inet_ntoa(*(struct in_addr *)&x));
+
+
+}
+
+输出结果
+1.2.3.4
+
+SOCKADDR_IN sock;  
+sock.sin_family = AF_INET;  
+//将字符串转换为in_addr类型  
+sock.sin_addr.S_un.S_addr =  inet_addr("192.168.1.111");  
+sock.sin_port = htons(5000);  
+  
+//将in_addr类型转换为字符串  
+printf("inet_ntoa ip = %s\n",inet_ntoa(sock.sin_addr)); 
