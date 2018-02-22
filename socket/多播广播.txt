@@ -1,0 +1,17 @@
+《Linux网络接口》---------struct ifreq struct ifconf
+
+http://blog.csdn.net/q_l_s/article/details/52716730
+
+Linux网络接口操作之ioctl-1_接口参数
+https://segmentfault.com/a/1190000005138358
+
+
+
+linux网络编程之二-----多播（组播）编程
+
+http://blog.csdn.net/ctthuangcheng/article/details/46568949
+
+
+
+单播、多播（组播）和广播的区别
+https://www.cnblogs.com/rogerroddick/archive/2009/08/31/1557228.html
