@@ -37,20 +37,24 @@ kill -l 列出的就是，总共62个
     int sigdelset(sigset_t *set, int signo);   // 在set中去掉signo信号
     int sigismember(sigset_t *set, int signo); // 信号signo是否在信号集set中
     int sigprocmask(int how, const sigset_t set, sigset_t oset); 
-一个进程的信号屏蔽字规定了当前阻塞而不能递送给该进程的信号集。sigprocmask()可以用来检测或改变目前的信号屏蔽字，其操作依参数how来决定，如果参数oldset不是NULL指针，那么目前的信号屏蔽字会由此指针返回。如果set是一个非空指针，则参数how指示如何修改当前信号屏蔽字。每个进程都有一个用来描述哪些信号递送到进程时将被阻塞的信号集，该信号集中的所有信号在递送到进程后都将被阻塞。
+一个进程的信号屏蔽字规定了当前阻塞而不能递送给该进程的信号集。sigprocmask()可以用来检测或改变目前的信号屏蔽字，其操作依参数how来决定，
+如果参数oldset不是NULL指针，那么目前的信号屏蔽字会由此指针返回。如果set是一个非空指针，则参数how指示如何修改当前信号屏蔽字。每个进程都有一个用来
+描述哪些信号递送到进程时将被阻塞的信号集，该信号集中的所有信号在递送到进程后都将被阻塞。
 参数how的取值不同，带来的操作行为也不同，该参数可选值如下：
       SIG_BLOCK
               The set of blocked signals is the union of the current set and the set argument.
 
        SIG_UNBLOCK
-              The signals in set are removed from the current set of blocked signals.  It is permissible to attempt to unblock a signal which is not blocked.
+              The signals in set are removed from the current set of blocked signals.  It is permissible to attempt to unblock 
+              a signal which is not blocked.
 
        SIG_SETMASK
               The set of blocked signals is set to the argument set.
 
        If oldset is non-NULL, the previous value of the signal mask is stored in oldset.
 
-       If set is NULL, then the signal mask is unchanged (i.e., how is ignored), but the current value of the signal mask is nevertheless returned in oldset (if it
+       If set is NULL, then the signal mask is unchanged (i.e., how is ignored), but the current value of the signal 
+       mask is nevertheless returned in oldset (if it
        is not NULL).
 
        The use of sigprocmask() is unspecified in a multithreaded process; see pthread_sigmask(3).
@@ -220,7 +224,8 @@ sigemptyset(&newmask);//初始化信号量集
 sigaddset(&newmask, SIGINT);//将SIGINT添加到信号量集中
 
 sigprocmask(SIG_BLOCK, &newmask, &oldmask);//将newmask中的SIGINT阻塞掉，并保存当前信号屏蔽字到Oldmask
-sleep(5);//休眠5秒钟，说明:在5s休眠期间，任何SIGINT信号都会被阻塞，如果在5s内收到任何键盘的Ctrl+C信号，则此时会把这些信息存在内核的队列中，等待5s结束后，可能要处理此信号。
+sleep(5);//休眠5秒钟，说明:在5s休眠期间，任何SIGINT信号都会被阻塞，如果在5s内收到任何键盘的Ctrl+C信号，则此时会把这些信息存在内核的队列中，
+ //等待5s结束后，可能要处理此信号。
 sigpending(&pendmask);//检查信号是悬而未决的,
 
 if (sigismember(&pendmask, SIGINT))//SIGINT是悬而未决的。所谓悬而未决，是指SIGINT被阻塞还没有被处理
@@ -363,7 +368,9 @@ int main()
 
  
 
-    if(sigsuspend(&wait) != -1)  //程序在此处挂起；用wait信号集替换new信号集。即：过来SIGUSR1信  号，阻塞掉，程序继续挂起；过来其他信号，例如SIGINT，则会唤醒程序。执行sigsuspend的原子操作。注意：如果“sigaddset(&wait, SIGUSR1);”这句没有，则此处不会阻塞任何信号，即过来任何信号均会唤醒程序。
+    if(sigsuspend(&wait) != -1)  //程序在此处挂起；用wait信号集替换new信号集。即：过来SIGUSR1信  号，阻塞掉，程序继续挂起；过来其他信号，
+     //例如SIGINT，则会唤醒程序。执行sigsuspend的原子操作。注意：如果“sigaddset(&wait, SIGUSR1);”这句没有，则此处不会阻塞任何信号，
+     //即过来任何信号均会唤醒程序。
 
         printf("sigsuspend error");
 
